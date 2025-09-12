@@ -1,5 +1,11 @@
 const db = require('../config/db');
 
+// A simple regex to check if a string is in UUID format
+const isUuid = (str) => {
+    const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+    return uuidRegex.test(str);
+};
+
 exports.verifyQrCode = async (req, res) => {
     const { qr_code_id, gate_number } = req.body;
 
@@ -7,18 +13,24 @@ exports.verifyQrCode = async (req, res) => {
         return res.status(400).json({ status: 'ERROR', message: 'QR Code ID is required.' });
     }
 
+    if (!isUuid(qr_code_id)) {
+        return res.status(400).json({ status: 'REJECTED', message: 'Invalid QR Code format.' });
+    }
+
     try {
         // Step 1: Find the vehicle and its details using the QR Code ID.
         const vehicleQuery = `
-      SELECT 
-        v.id, v.vehicle_number, v.model, v.type,
-        e.name as owner_name,
-        d.name as department_name
-      FROM vehicles v
-      LEFT JOIN employees e ON v.owner_id = e.id
-      LEFT JOIN departments d ON v.department_id = d.id
-      WHERE v.qr_code_id = $1 AND v.status = 'ACTIVE'
-    `;
+  SELECT 
+    v.id, v.vehicle_number, v.model, v.type,
+    e.name as owner_name,
+    d_employee.name as employee_department,
+    d_vehicle.name as vehicle_department   
+  FROM vehicles v
+  LEFT JOIN employees e ON v.owner_id = e.id
+  LEFT JOIN departments d_employee ON e.department_id = d_employee.id
+  LEFT JOIN departments d_vehicle ON v.department_id = d_vehicle.id
+  WHERE v.qr_code_id = $1 AND v.status = 'ACTIVE'
+`;
         const vehicleResult = await db.query(vehicleQuery, [qr_code_id]);
 
         if (vehicleResult.rows.length === 0) {
