@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { getEmployees, getDepartments, createEmployee, updateEmployee, deleteEmployee } from '../services/api';
 import EmployeeModal from '../components/EmployeeModal';
+import Pagination from '../components/Pagination';
 import './Table.css';
 import './Filters.css';
 
@@ -8,6 +9,7 @@ const EmployeesPage = () => {
     const [employees, setEmployees] = useState([]);
     const [departments, setDepartments] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [pagination, setPagination] = useState({ page: 1, totalPages: 1 });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -17,19 +19,25 @@ const EmployeesPage = () => {
     const fetchData = useCallback(async () => {
         try {
             setLoading(true);
+            const params = { search: searchTerm, page: pagination.page };
             const [employeesRes, departmentsRes] = await Promise.all([
-                getEmployees({ search: searchTerm }), // Pass search term
-                getDepartments()
+                getEmployees(params),
+                getDepartments() // Assuming departments list is small and not paginated
             ]);
-            setEmployees(employeesRes.data);
+            setEmployees(employeesRes.data.data);
+            setPagination({
+                page: employeesRes.data.page,
+                totalPages: employeesRes.data.totalPages,
+            });
             setDepartments(departmentsRes.data);
+            setError(null);
         } catch (err) {
             setError('Failed to fetch data.');
             console.error(err);
         } finally {
             setLoading(false);
         }
-    }, [searchTerm]);
+    }, [searchTerm, pagination.page]);
 
     useEffect(() => {
         const delayDebounceFn = setTimeout(() => {
@@ -37,6 +45,10 @@ const EmployeesPage = () => {
         }, 500);
         return () => clearTimeout(delayDebounceFn);
     }, [searchTerm, fetchData]);
+
+    const handlePageChange = (newPage) => {
+        setPagination(prev => ({ ...prev, page: newPage }));
+    };
 
     const handleAddNew = () => {
         setCurrentEmployee(null);
@@ -92,29 +104,36 @@ const EmployeesPage = () => {
             </div>
 
             {loading ? <p>Loading...</p> : (
-                <table className="data-table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Employee ID</th>
-                            <th>Department</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {employees.map(emp => (
-                            <tr key={emp.id}>
-                                <td>{emp.name}</td>
-                                <td>{emp.employee_id_str}</td>
-                                <td>{emp.department_name}</td>
-                                <td>
-                                    <button className="btn" onClick={() => handleEdit(emp)}>Edit</button>
-                                    <button className="btn btn-danger" onClick={() => handleDelete(emp.id)}>Delete</button>
-                                </td>
+                <>
+                    <table className="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Employee ID</th>
+                                <th>Department</th>
+                                <th>Actions</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {employees.map(emp => (
+                                <tr key={emp.id}>
+                                    <td>{emp.name}</td>
+                                    <td>{emp.employee_id_str}</td>
+                                    <td>{emp.department_name}</td>
+                                    <td>
+                                        <button className="btn" onClick={() => handleEdit(emp)}>Edit</button>
+                                        <button className="btn btn-danger" onClick={() => handleDelete(emp.id)}>Delete</button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                    <Pagination
+                        currentPage={pagination.page}
+                        totalPages={pagination.totalPages}
+                        onPageChange={handlePageChange}
+                    />
+                </>
             )}
             <EmployeeModal
                 isOpen={isModalOpen}

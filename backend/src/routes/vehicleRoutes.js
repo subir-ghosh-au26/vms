@@ -7,6 +7,9 @@ const {
     updateVehicle,
     deleteVehicle,
 } = require('../controllers/vehicleController');
+const { protect, isAdmin } = require('../middleware/authMiddleware');
+
+router.use(protect, isAdmin);
 
 router.route('/')
     .post(createVehicle)

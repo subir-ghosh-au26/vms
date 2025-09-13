@@ -24,29 +24,41 @@ exports.createVehicle = async (req, res) => {
 // @desc    Get all vehicles with details
 // @route   GET /api/vehicles
 exports.getAllVehicles = async (req, res) => {
-    const { search } = req.query;
+    const { search, page = 1, limit = 10 } = req.query;
+    const offset = (page - 1) * limit;
 
-    let query = `
-    SELECT 
-      v.id, v.vehicle_number, v.model, v.type, v.status, v.qr_code_id,
-      v.owner_id, e.name AS owner_name,
-      v.department_id, d.name AS department_name
+    let baseQuery = `
     FROM vehicles v
     LEFT JOIN employees e ON v.owner_id = e.id
     LEFT JOIN departments d ON v.department_id = d.id
   `;
+    const whereClauses = [];
     const queryParams = [];
+    let paramIndex = 1;
 
     if (search) {
-        query += ' WHERE v.vehicle_number ILIKE $1 OR v.model ILIKE $1';
+        whereClauses.push(`(v.vehicle_number ILIKE $${paramIndex} OR v.model ILIKE $${paramIndex})`);
         queryParams.push(`%${search}%`);
+        paramIndex++;
     }
 
-    query += ' ORDER BY v.created_at DESC';
+    if (whereClauses.length > 0) {
+        baseQuery += ` WHERE ${whereClauses.join(' AND ')}`;
+    }
+
+    const dataQuery = `SELECT v.id, v.vehicle_number, v.model, v.type, v.status, v.qr_code_id, v.owner_id, e.name AS owner_name, v.department_id, d.name AS department_name ${baseQuery} ORDER BY v.created_at DESC LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
+    const countQuery = `SELECT COUNT(*) ${baseQuery}`;
 
     try {
-        const result = await db.query(query, queryParams);
-        res.status(200).json(result.rows);
+        const dataResult = await db.query(dataQuery, [...queryParams, limit, offset]);
+        const countResult = await db.query(countQuery, queryParams);
+
+        res.status(200).json({
+            data: dataResult.rows,
+            total: parseInt(countResult.rows[0].count, 10),
+            page: parseInt(page, 10),
+            totalPages: Math.ceil(countResult.rows[0].count / limit),
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

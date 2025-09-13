@@ -38,12 +38,10 @@ exports.getDashboardStats = async (req, res) => {
 // @desc    Get all activity logs with vehicle details
 // @route   GET /api/logs
 exports.getActivityLogs = async (req, res) => {
-    const { search, startDate, endDate } = req.query;
+    const { search, startDate, endDate, page = 1, limit = 15 } = req.query; // limit 15 for logs
+    const offset = (page - 1) * limit;
 
-    let query = `
-    SELECT 
-      al.id, al.entry_time, al.exit_time, al.entry_gate, al.exit_gate,
-      v.vehicle_number, v.model, e.name AS owner_name
+    let baseQuery = `
     FROM activity_log al
     JOIN vehicles v ON al.vehicle_id = v.id
     LEFT JOIN employees e ON v.owner_id = e.id
@@ -62,7 +60,6 @@ exports.getActivityLogs = async (req, res) => {
         queryParams.push(startDate);
     }
     if (endDate) {
-        // Add 1 day to the end date to include the entire day
         const nextDay = new Date(endDate);
         nextDay.setDate(nextDay.getDate() + 1);
         whereClauses.push(`al.entry_time < $${paramIndex++}`);
@@ -70,14 +67,22 @@ exports.getActivityLogs = async (req, res) => {
     }
 
     if (whereClauses.length > 0) {
-        query += ` WHERE ${whereClauses.join(' AND ')}`;
+        baseQuery += ` WHERE ${whereClauses.join(' AND ')}`;
     }
 
-    query += ' ORDER BY al.entry_time DESC';
+    const dataQuery = `SELECT al.id, al.entry_time, al.exit_time, al.entry_gate, al.exit_gate, v.vehicle_number, v.model, e.name AS owner_name ${baseQuery} ORDER BY al.entry_time DESC LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
+    const countQuery = `SELECT COUNT(*) ${baseQuery}`;
 
     try {
-        const result = await db.query(query, queryParams);
-        res.status(200).json(result.rows);
+        const dataResult = await db.query(dataQuery, [...queryParams, limit, offset]);
+        const countResult = await db.query(countQuery, queryParams);
+
+        res.status(200).json({
+            data: dataResult.rows,
+            total: parseInt(countResult.rows[0].count, 10),
+            page: parseInt(page, 10),
+            totalPages: Math.ceil(countResult.rows[0].count / limit),
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

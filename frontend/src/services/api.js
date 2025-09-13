@@ -4,6 +4,20 @@ const api = axios.create({
     baseURL: 'http://localhost:5000/api',
 });
 
+// Interceptor to add the auth token to every request
+api.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('vms_token');
+        if (token) {
+            config.headers['Authorization'] = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
+
 //Department
 export const getDepartments = () => api.get('/departments');
 export const createDepartment = (departmentData) => api.post('/departments', departmentData);

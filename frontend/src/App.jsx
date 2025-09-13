@@ -16,7 +16,6 @@ function App() {
     <Routes>
       {/* Public Route: Login Page */}
       <Route path="/login" element={<LoginPage />} />
-
       {/* Protected Routes: All dashboard pages */}
       <Route
         path="/*"

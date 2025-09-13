@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { getActivityLog } from '../services/api';
+import Pagination from '../components/Pagination';
 import './Table.css';
 import './Filters.css';
 
@@ -11,22 +12,32 @@ const ActivityLogPage = () => {
         startDate: '',
         endDate: '',
     });
+    const [pagination, setPagination] = useState({ page: 1, totalPages: 1 });
 
     const fetchLogs = useCallback(async () => {
         try {
             setLoading(true);
-            const res = await getActivityLog(filters);
-            setLogs(res.data);
+            const params = { ...filters, page: pagination.page };
+            const res = await getActivityLog(params);
+            setLogs(res.data.data);
+            setPagination({
+                page: res.data.page,
+                totalPages: res.data.totalPages
+            });
         } catch (error) {
             console.error("Failed to fetch activity log", error);
         } finally {
             setLoading(false);
         }
-    }, [filters]);
+    }, [filters, pagination.page]);
 
     useEffect(() => {
         fetchLogs();
     }, [fetchLogs]);
+
+    const handlePageChange = (newPage) => {
+        setPagination(prev => ({ ...prev, page: newPage }));
+    };
 
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
@@ -68,28 +79,35 @@ const ActivityLogPage = () => {
             </div>
 
             {loading ? <p>Loading activity log...</p> : (
-                <table className="data-table">
-                    <thead>
-                        <tr>
-                            <th>Vehicle Number</th>
-                            <th>Owner</th>
-                            <th>Entry Time</th>
-                            <th>Exit Time</th>
-                            <th>Entry Gate</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {logs.map(log => (
-                            <tr key={log.id}>
-                                <td>{log.vehicle_number}</td>
-                                <td>{log.owner_name || 'N/A'}</td>
-                                <td>{formatDateTime(log.entry_time)}</td>
-                                <td>{formatDateTime(log.exit_time)}</td>
-                                <td>{log.entry_gate || 'N/A'}</td>
+                <>
+                    <table className="data-table">
+                        <thead>
+                            <tr>
+                                <th>Vehicle Number</th>
+                                <th>Owner</th>
+                                <th>Entry Time</th>
+                                <th>Exit Time</th>
+                                <th>Entry Gate</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {logs.map(log => (
+                                <tr key={log.id}>
+                                    <td>{log.vehicle_number}</td>
+                                    <td>{log.owner_name || 'N/A'}</td>
+                                    <td>{formatDateTime(log.entry_time)}</td>
+                                    <td>{formatDateTime(log.exit_time)}</td>
+                                    <td>{log.entry_gate || 'N/A'}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                    <Pagination
+                        currentPage={pagination.page}
+                        totalPages={pagination.totalPages}
+                        onPageChange={handlePageChange}
+                    />
+                </>
             )}
         </div>
     );
