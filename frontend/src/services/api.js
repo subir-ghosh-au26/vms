@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || 'https://vms-api-wvct.onrender.com/api',
+    baseURL: 'https://vms-api-wvct.onrender.com/api',
 });
 
 // Interceptor to add the auth token to every request
