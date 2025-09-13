@@ -18,7 +18,9 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors()); // Enable Cross-Origin Resource Sharing
+app.use(cors({
+    origin: 'https://vms-admin-a3g0.onrender.com'
+}));
 app.use(express.json());
 
 
