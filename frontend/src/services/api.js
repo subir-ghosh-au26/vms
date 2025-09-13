@@ -39,6 +39,7 @@ export const deleteVehicle = (id) => api.delete(`/vehicles/${id}`);
 // --- Dashboard & Log Functions ---
 export const getStats = () => api.get('/dashboard/stats');
 export const getActivityLog = (filters) => api.get('/dashboard/logs', { params: filters });
+export const getDepartmentEntryStats = () => api.get('/dashboard/department-entries');
 
 
 export default api;

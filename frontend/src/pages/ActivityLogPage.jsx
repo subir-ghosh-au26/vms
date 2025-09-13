@@ -48,10 +48,11 @@ const ActivityLogPage = () => {
     const formatDateTime = (isoString) => {
         if (!isoString) return '---';
         const date = new Date(isoString);
-        return date.toLocaleString(); // Adjust formatting as needed
+        return date.toLocaleString();
     };
 
     if (loading) return <p>Loading activity log...</p>;
+
 
     return (
         <div>
@@ -94,7 +95,7 @@ const ActivityLogPage = () => {
                             {logs.map(log => (
                                 <tr key={log.id}>
                                     <td>{log.vehicle_number}</td>
-                                    <td>{log.owner_name || 'N/A'}</td>
+                                    <td>{log.assigned_to || 'N/A'}</td>
                                     <td>{formatDateTime(log.entry_time)}</td>
                                     <td>{formatDateTime(log.exit_time)}</td>
                                     <td>{log.entry_gate || 'N/A'}</td>

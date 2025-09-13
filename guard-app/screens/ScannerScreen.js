@@ -39,7 +39,7 @@ export default function ScannerScreen({ navigation }) {
                         );
                     }}
                     title="Logout"
-                    color="#e74c3c" // A red color for the logout button
+                    color="#e74c3c"
                 />
             ),
         });
@@ -55,7 +55,7 @@ export default function ScannerScreen({ navigation }) {
             setHasPermission(status === 'granted');
         };
         getCameraPermissions();
-    }, []); // The empty array ensures this runs only once.
+    }, []);
 
     // This function handles the QR code scanning event.
     const handleBarCodeScanned = async ({ data }) => {

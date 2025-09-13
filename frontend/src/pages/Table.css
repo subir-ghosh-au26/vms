@@ -1,42 +1,45 @@
+/* src/pages/Table.css */
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+}
+.page-header h2 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 600;
 }
 
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+  overflow: hidden; /* Important for border-radius */
 }
 
 .data-table th,
 .data-table td {
-  border: 1px solid #ddd;
-  padding: 12px;
+  padding: 16px;
   text-align: left;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .data-table th {
-  background-color: #f8f8f8;
+  background-color: var(--light-color);
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  color: var(--secondary-color);
 }
 
-.data-table tr:nth-child(even) {
-  background-color: #f2f2f2;
-}
-
-.data-table tr:hover {
-  background-color: #ddd;
+.data-table tbody tr:hover {
+  background-color: #f8f9fa;
 }
 
 .data-table td:last-child {
   display: flex;
   gap: 10px;
-}
-
-.btn-danger {
-  background: #dc3545;
-  color: white;
-  border-color: #dc3545;
 }

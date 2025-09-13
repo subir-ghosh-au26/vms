@@ -19,7 +19,8 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors()); // Enable Cross-Origin Resource Sharing
-app.use(express.json()); // Enable the Express app to parse JSON formatted request bodies
+app.use(express.json());
+
 
 // A simple root route for testing
 app.get('/', (req, res) => {

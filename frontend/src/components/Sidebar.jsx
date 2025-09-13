@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Sidebar.css';
+import logo from '../assets/logo.png';
 
 const Sidebar = () => {
     const navigate = useNavigate();
@@ -14,7 +15,8 @@ const Sidebar = () => {
     return (
         <div className="sidebar">
             <div className="sidebar-header">
-                <h2>VMS Admin</h2>
+                <img src={logo} alt="Institute Logo" className="sidebar-logo" />
+                <h2>VMS</h2>
             </div>
             <nav className="sidebar-nav">
                 <ul>

@@ -38,13 +38,14 @@ exports.getDashboardStats = async (req, res) => {
 // @desc    Get all activity logs with vehicle details
 // @route   GET /api/logs
 exports.getActivityLogs = async (req, res) => {
-    const { search, startDate, endDate, page = 1, limit = 15 } = req.query; // limit 15 for logs
+    const { search, startDate, endDate, page = 1, limit = 15 } = req.query;
     const offset = (page - 1) * limit;
 
     let baseQuery = `
     FROM activity_log al
     JOIN vehicles v ON al.vehicle_id = v.id
     LEFT JOIN employees e ON v.owner_id = e.id
+    LEFT JOIN departments d ON v.department_id = d.id -- Join for the vehicle's assigned department
   `;
 
     const whereClauses = [];
@@ -70,7 +71,15 @@ exports.getActivityLogs = async (req, res) => {
         baseQuery += ` WHERE ${whereClauses.join(' AND ')}`;
     }
 
-    const dataQuery = `SELECT al.id, al.entry_time, al.exit_time, al.entry_gate, al.exit_gate, v.vehicle_number, v.model, e.name AS owner_name ${baseQuery} ORDER BY al.entry_time DESC LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
+    const dataQuery = `
+    SELECT 
+      al.id, al.entry_time, al.exit_time, al.entry_gate, al.exit_gate,
+      v.vehicle_number, v.model,
+      COALESCE(e.name, d.name) AS assigned_to -- Use employee name, if NULL, use department name
+    ${baseQuery} 
+    ORDER BY al.entry_time DESC 
+    LIMIT $${paramIndex++} OFFSET $${paramIndex++}
+  `;
     const countQuery = `SELECT COUNT(*) ${baseQuery}`;
 
     try {
@@ -83,6 +92,33 @@ exports.getActivityLogs = async (req, res) => {
             page: parseInt(page, 10),
             totalPages: Math.ceil(countResult.rows[0].count / limit),
         });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// @desc    Get vehicle entry counts by department for today
+// @route   GET /api/dashboard/department-entries
+exports.getDepartmentEntriesToday = async (req, res) => {
+    try {
+        const query = `
+      SELECT
+        -- Use the vehicle's assigned department if it's a DEPT_CAR, otherwise use the employee's department
+        COALESCE(d_vehicle.name, d_employee.name) AS department_name,
+        COUNT(*) AS entry_count
+      FROM activity_log al
+      JOIN vehicles v ON al.vehicle_id = v.id
+      LEFT JOIN departments d_vehicle ON v.department_id = d_vehicle.id AND v.type = 'DEPT_CAR'
+      LEFT JOIN employees e ON v.owner_id = e.id
+      LEFT JOIN departments d_employee ON e.department_id = d_employee.id
+      -- Filter for entries that occurred today
+      WHERE al.entry_time >= current_date
+        AND COALESCE(d_vehicle.name, d_employee.name) IS NOT NULL
+      GROUP BY department_name
+      ORDER BY entry_count DESC;
+    `;
+        const result = await db.query(query);
+        res.status(200).json(result.rows);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

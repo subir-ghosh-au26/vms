@@ -1,5 +1,6 @@
 const db = require('../config/db');
 
+
 // @desc    Create a new department
 // @route   POST /api/departments
 exports.createDepartment = async (req, res) => {
@@ -22,6 +23,7 @@ exports.createDepartment = async (req, res) => {
 // @route   GET /api/departments
 exports.getAllDepartments = async (req, res) => {
     try {
+        // This now fetches directly from the database every time.
         const result = await db.query('SELECT * FROM departments ORDER BY name ASC');
         res.status(200).json(result.rows);
     } catch (err) {
