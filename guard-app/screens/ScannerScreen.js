@@ -1,16 +1,15 @@
 import React, { useState, useEffect, useLayoutEffect } from 'react';
-import { Text, View, StyleSheet, Button, Alert } from 'react-native';
+import { Text, View, StyleSheet, Button, Alert } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-// We only need expo-camera now
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import api from '../api';
 
 export default function ScannerScreen({ navigation }) {
-    // Use the modern hook for permissions
     const [permission, requestPermission] = useCameraPermissions();
     const [scanned, setScanned] = useState(false);
 
     useLayoutEffect(() => {
+        // ... (Your logout button logic - no changes needed here)
         navigation.setOptions({
             headerRight: () => (
                 <Button
@@ -35,40 +34,45 @@ export default function ScannerScreen({ navigation }) {
         });
     }, [navigation]);
 
-    // This function handles the barcode scanning event.
-    // Note: The data structure is slightly different: `barcodes` is an array.
-    const handleBarcodeScanned = ({ barcodes }) => {
-        if (barcodes.length > 0 && !scanned) {
-            setScanned(true); // Prevent multiple scans
-            const scannedData = barcodes[0].data; // Get the data from the first scanned code
-            console.log(`Scanned QR Code: ${scannedData}`);
+    // --- THE FIX IS IN THIS FUNCTION ---
+    const handleBarcodeScanned = (scanningResult) => {
+        if (!scanned) {
+            // The new structure provides the data directly on the result object
+            const { data } = scanningResult;
 
-            // Send data to the backend
-            verifyData(scannedData);
+            // Check if data is not null or empty
+            if (data) {
+                setScanned(true); // Prevent multiple scans
+                console.log(`Scanned QR Code: ${data}`);
+                verifyData(data);
+            }
         }
     };
 
     const verifyData = async (data) => {
+        let resultData;
         try {
             const response = await api.post('/scan/verify', {
                 qr_code_id: data,
                 gate_number: 'Main Gate',
             });
-            navigation.replace('Result', { result: response.data });
+            resultData = response.data;
         } catch (error) {
-            const errorData = error.response ? error.response.data : { status: 'ERROR', message: 'Could not connect to the server.' };
-            navigation.replace('Result', { result: errorData });
+            if (error.response && error.response.data) {
+                resultData = error.response.data;
+            } else {
+                resultData = { status: 'ERROR', message: 'A network error occurred.' };
+            }
         }
+        navigation.replace('Result', { result: resultData });
     };
 
     // Render UI based on permission status.
     if (!permission) {
-        // Permissions are still loading
-        return <View />;
+        return <View />; // Permissions are still loading
     }
 
     if (!permission.granted) {
-        // Permissions have not been granted yet
         return (
             <View style={styles.permissionContainer}>
                 <Text style={{ textAlign: 'center', marginBottom: 10 }}>We need your permission to use the camera scanner.</Text>
@@ -81,9 +85,9 @@ export default function ScannerScreen({ navigation }) {
     return (
         <View style={styles.container}>
             <CameraView
-                onBarcodeScanned={handleBarcodeScanned}
+                onBarcodeScanned={scanned ? undefined : handleBarcodeScanned}
                 barcodeScannerSettings={{
-                    barcodeTypes: ["qr"], // We only care about QR codes
+                    barcodeTypes: ["qr"],
                 }}
                 style={StyleSheet.absoluteFillObject}
             />
