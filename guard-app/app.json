@@ -12,7 +12,6 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-
     "ios": {
       "supportsTablet": true
     },
@@ -21,12 +20,17 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "permissions": ["android.permission.CAMERA"]
+      "permissions": ["android.permission.CAMERA"],
+      "package": "com.bipard.guardapp"
     },
-
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": ["expo-barcode-scanner"]
+    "plugins": ["expo-barcode-scanner"],
+    "extra": {
+      "eas": {
+        "projectId": "4c0ac17c-b41e-4ed5-a46f-ae3c6c8195a0"
+      }
+    }
   }
 }
