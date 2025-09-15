@@ -1,49 +1,57 @@
 import React, { useRef, useEffect, useState } from 'react';
 import QRCodeStyling from 'qr-code-styling';
 import './Modal.css';
-import instituteLogo from '../assets/logo.png';
+
+import instituteLogoGlossy from '../assets/logo-glossy.png';
 
 const QRCodeModal = ({ isOpen, onClose, vehicle }) => {
     const ref = useRef(null);
     const [qrCodeInstance, setQrCodeInstance] = useState(null);
 
-    // This effect creates and updates the QR code whenever the modal is opened or the vehicle data changes.
     useEffect(() => {
         if (isOpen && vehicle && ref.current) {
-            // If an instance doesn't exist, create one.
             if (!qrCodeInstance) {
                 const qrCode = new QRCodeStyling({
-                    width: 256,
-                    height: 256,
+                    width: 300,
+                    height: 300,
                     data: vehicle.qr_code_id,
-                    image: instituteLogo,
+                    margin: 10,
+                    qrOptions: {
+                        errorCorrectionLevel: 'H', // ESSENTIAL for this style
+                    },
                     dotsOptions: {
-                        color: '#002D62',
-                        type: 'rounded',
+                        color: '#000000', // Use solid black dots for maximum contrast
+                        type: 'dots',
                     },
+                    // Use standard, solid corners for best scannability
                     cornersSquareOptions: {
-                        type: 'extra-rounded',
-                        color: '#002D62',
+                        color: '#000000',
+                        type: 'square',
                     },
+                    cornersDotOptions: {
+                        color: '#000000',
+                        type: 'square',
+                    },
+                    // --- THE KEY LOGIC FOR THE OVERLAY EFFECT ---
+                    image: instituteLogoGlossy,
                     imageOptions: {
-                        imageSize: 0.4,
-                        margin: 0.2,
+                        // This is the magic property. It keeps the dots visible behind the image.
+                        hideBackgroundDots: false,
+                        imageSize: 0.6, // Make the logo large (60%)
+                        margin: 4,
                     },
                 });
 
-                // Clear the container and append the new QR code
                 ref.current.innerHTML = '';
                 qrCode.append(ref.current);
-                setQrCodeInstance(qrCode); // Save the instance to state
+                setQrCodeInstance(qrCode);
             } else {
-                // If an instance already exists, just update it with the new data
                 qrCodeInstance.update({
                     data: vehicle.qr_code_id,
-                    image: instituteLogo,
                 });
             }
         }
-    }, [isOpen, vehicle, qrCodeInstance]); // Rerun this effect when these dependencies change
+    }, [isOpen, vehicle, qrCodeInstance]);
 
     const handleDownload = () => {
         if (qrCodeInstance) {
@@ -60,7 +68,6 @@ const QRCodeModal = ({ isOpen, onClose, vehicle }) => {
             <div className="modal-content" style={{ textAlign: 'center' }}>
                 <h2>QR Code for {vehicle.vehicle_number}</h2>
 
-                {/* This div is the container where the QR code will be rendered */}
                 <div ref={ref} />
 
                 <p style={{ marginTop: '10px' }}><strong>Model:</strong> {vehicle.model}</p>

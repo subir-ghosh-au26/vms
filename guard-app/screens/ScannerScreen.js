@@ -9,7 +9,6 @@ export default function ScannerScreen({ navigation }) {
     const [scanned, setScanned] = useState(false);
 
     useLayoutEffect(() => {
-        // ... (Your logout button logic - no changes needed here)
         navigation.setOptions({
             headerRight: () => (
                 <Button
