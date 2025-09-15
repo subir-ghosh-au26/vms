@@ -17,10 +17,13 @@ const app = express();
 // Set the port from environment variables, with a default
 const PORT = process.env.PORT || 5000;
 
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(cors({
     origin: 'https://vms-admin-a3g0.onrender.com'
 }));
+// app.use(cors());
 app.use(express.json());
 
 

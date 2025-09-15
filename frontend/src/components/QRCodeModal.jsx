@@ -27,7 +27,7 @@ const QRCodeModal = ({ isOpen, onClose, vehicle }) => {
                     },
                     imageOptions: {
                         imageSize: 0.4,
-                        margin: 2,
+                        margin: 0.2,
                     },
                 });
 
