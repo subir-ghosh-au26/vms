@@ -2,6 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
     baseURL: 'https://vms-api-wvct.onrender.com/api',
+    // baseURL: 'https://localhost:5000/api',
 });
 
 // Interceptor to add the auth token to every request

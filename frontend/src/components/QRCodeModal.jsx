@@ -17,13 +17,13 @@ const QRCodeModal = ({ isOpen, onClose, vehicle }) => {
                     data: vehicle.qr_code_id,
                     margin: 10,
                     qrOptions: {
-                        errorCorrectionLevel: 'H', // ESSENTIAL for this style
+                        errorCorrectionLevel: 'H',
                     },
                     dotsOptions: {
-                        color: '#000000', // Use solid black dots for maximum contrast
+                        color: '#000000',
                         type: 'dots',
                     },
-                    // Use standard, solid corners for best scannability
+
                     cornersSquareOptions: {
                         color: '#000000',
                         type: 'square',
@@ -35,10 +35,10 @@ const QRCodeModal = ({ isOpen, onClose, vehicle }) => {
                     // --- THE KEY LOGIC FOR THE OVERLAY EFFECT ---
                     image: instituteLogoGlossy,
                     imageOptions: {
-                        // This is the magic property. It keeps the dots visible behind the image.
+
                         hideBackgroundDots: false,
-                        imageSize: 0.6, // Make the logo large (60%)
-                        margin: 4,
+                        imageSize: 1.5,
+                        margin: 0.2,
                     },
                 });
 
