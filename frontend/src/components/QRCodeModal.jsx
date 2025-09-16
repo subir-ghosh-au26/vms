@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import QRCodeStyling from 'qr-code-styling';
 import './Modal.css';
 
-import instituteLogoGlossy from '../assets/logo-glossy.png';
+import instituteLogo from '../assets/logo.png';
 
 const QRCodeModal = ({ isOpen, onClose, vehicle }) => {
     const ref = useRef(null);
@@ -26,18 +26,18 @@ const QRCodeModal = ({ isOpen, onClose, vehicle }) => {
 
                     cornersSquareOptions: {
                         color: '#000000',
-                        type: 'square',
+                        type: 'rounded',
                     },
                     cornersDotOptions: {
                         color: '#000000',
-                        type: 'square',
+                        type: 'rounded',
                     },
                     // --- THE KEY LOGIC FOR THE OVERLAY EFFECT ---
-                    image: instituteLogoGlossy,
+                    image: instituteLogo,
                     imageOptions: {
 
                         hideBackgroundDots: false,
-                        imageSize: 1.5,
+                        imageSize: 1,
                         margin: 0.2,
                     },
                 });
