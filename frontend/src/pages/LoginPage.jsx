@@ -6,6 +6,7 @@ import './LoginPage.css';
 const LoginPage = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
@@ -36,6 +37,7 @@ const LoginPage = () => {
 
     return (
         <div className="login-container">
+            <h1>Bihar Institute of Public Administration & Rural Development</h1>
             <div className="login-box">
                 <h2>Admin Dashboard Login</h2>
                 <form onSubmit={handleLogin}>
@@ -51,13 +53,21 @@ const LoginPage = () => {
                     </div>
                     <div className="input-group">
                         <label htmlFor="password">Password</label>
-                        <input
-                            id="password"
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
+                        <div className="password-wrapper">
+                            <input
+                                id="password"
+                                type={showPassword ? 'text' : 'password'}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                            />
+                            <span
+                                className="password-toggle-icon"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                {showPassword ? '🙈' : '👁️'}
+                            </span>
+                        </div>
                     </div>
                     {error && <p className="error-message">{error}</p>}
                     <button type="submit" className="login-button">Login</button>

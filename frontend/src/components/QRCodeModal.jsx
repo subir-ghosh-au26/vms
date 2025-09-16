@@ -1,8 +1,8 @@
+// src/components/QRCodeModal.jsx
 import React, { useRef, useEffect, useState } from 'react';
 import QRCodeStyling from 'qr-code-styling';
 import './Modal.css';
-
-import instituteLogo from '../assets/logo.png';
+import instituteLogo from '../assets/logo.png'; // Your standard logo
 
 const QRCodeModal = ({ isOpen, onClose, vehicle }) => {
     const ref = useRef(null);
@@ -10,48 +10,47 @@ const QRCodeModal = ({ isOpen, onClose, vehicle }) => {
 
     useEffect(() => {
         if (isOpen && vehicle && ref.current) {
+            // Define the configuration for the QR code style
+            const options = {
+                width: 300,
+                height: 300,
+                data: vehicle.qr_code_id,
+                margin: 10,
+                qrOptions: {
+                    errorCorrectionLevel: 'H',
+                },
+                dotsOptions: {
+                    color: '#002D62', // A professional dark blue color
+                    type: 'dots'
+                },
+                cornersSquareOptions: {
+                    color: '#002D62',
+                    type: 'extra-rounded',
+                },
+                cornersDotOptions: {
+                    color: '#002D62',
+                    type: 'extra-rounded',
+                },
+                image: instituteLogo,
+                imageOptions: {
+                    hideBackgroundDots: false,
+                    imageSize: 0.5,
+                    margin: 1,
+                },
+            };
+
+            // Create a new instance if one doesn't exist
             if (!qrCodeInstance) {
-                const qrCode = new QRCodeStyling({
-                    width: 300,
-                    height: 300,
-                    data: vehicle.qr_code_id,
-                    margin: 10,
-                    qrOptions: {
-                        errorCorrectionLevel: 'H',
-                    },
-                    dotsOptions: {
-                        color: '#000000',
-                        type: 'dots',
-                    },
-
-                    cornersSquareOptions: {
-                        color: '#000000',
-                        type: 'rounded',
-                    },
-                    cornersDotOptions: {
-                        color: '#000000',
-                        type: 'rounded',
-                    },
-                    // --- THE KEY LOGIC FOR THE OVERLAY EFFECT ---
-                    image: instituteLogo,
-                    imageOptions: {
-
-                        hideBackgroundDots: false,
-                        imageSize: 1,
-                        margin: 0.2,
-                    },
-                });
-
-                ref.current.innerHTML = '';
-                qrCode.append(ref.current);
+                const qrCode = new QRCodeStyling(options);
+                ref.current.innerHTML = ''; // Clear previous QR code
+                qrCode.append(ref.current); // Append the new one
                 setQrCodeInstance(qrCode);
             } else {
-                qrCodeInstance.update({
-                    data: vehicle.qr_code_id,
-                });
+                // If an instance already exists, just update its options
+                qrCodeInstance.update(options);
             }
         }
-    }, [isOpen, vehicle, qrCodeInstance]);
+    }, [isOpen, vehicle, qrCodeInstance]); // Rerun effect when dependencies change
 
     const handleDownload = () => {
         if (qrCodeInstance) {
@@ -68,6 +67,7 @@ const QRCodeModal = ({ isOpen, onClose, vehicle }) => {
             <div className="modal-content" style={{ textAlign: 'center' }}>
                 <h2>QR Code for {vehicle.vehicle_number}</h2>
 
+                {/* The container where the QR code canvas will be rendered */}
                 <div ref={ref} />
 
                 <p style={{ marginTop: '10px' }}><strong>Model:</strong> {vehicle.model}</p>

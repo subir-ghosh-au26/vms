@@ -1,16 +1,26 @@
 .login-container {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
   height: 100vh;
   /* Use your new background image */
-  background-color: rgb(217, 155, 219);
+  background-color: rgba(10, 10, 10, 0.534);
   background-size: cover;
   background-position: center;
   font-family: "Inter", sans-serif;
 }
 
+h1 {
+  text-align: center;
+  font-size: 3em;
+  color: #ffffff;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+}
+
 .login-box {
+  margin-top: 2%;
   padding: 40px;
   width: 100%;
   max-width: 400px;
@@ -38,7 +48,8 @@
 .input-group label {
   display: block;
   margin-bottom: 8px;
-  color: #f0f0f0; /* Light grey text */
+  font-weight: bold;
+  color: #ffffff; /* Light grey text */
 }
 
 .input-group input {
@@ -64,8 +75,8 @@
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 16px;
-  font-weight: bold;
+  font-size: 18px;
+  font-weight: bolder;
   transition: all 0.3s ease;
 }
 
@@ -78,4 +89,18 @@
   color: #ffcccc;
   text-align: center;
   margin-bottom: 15px;
+}
+
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.password-toggle-icon {
+  position: absolute;
+  right: 15px;
+  cursor: pointer;
+  color: #6c757d;
+  font-size: 1.2rem;
+  user-select: none;
 }
